@@ -1,22 +1,16 @@
 # utils/data_processor.py
 
-def clean_and_validate_data(raw_lines):
+def parse_transactions(raw_lines):
     """
-    Parses, cleans, and validates raw sales data
-    Prints required validation summary
+    Parses raw lines into clean list of dictionaries
     """
-
-    total_records = 0
-    invalid_records = 0
-    valid_records = []
+    transactions = []
 
     for line in raw_lines:
-        total_records += 1
         parts = line.split('|')
 
-        # Must have exactly 8 fields
+        # Skip rows with incorrect number of fields
         if len(parts) != 8:
-            invalid_records += 1
             continue
 
         (
@@ -30,16 +24,7 @@ def clean_and_validate_data(raw_lines):
             region
         ) = parts
 
-        # Validation rules
-        if not transaction_id.startswith('T'):
-            invalid_records += 1
-            continue
-
-        if not customer_id or not region:
-            invalid_records += 1
-            continue
-
-        # Clean product name
+        # Clean product name (remove commas)
         product_name = product_name.replace(',', '')
 
         # Clean numeric fields
@@ -47,14 +32,9 @@ def clean_and_validate_data(raw_lines):
             quantity = int(quantity.replace(',', ''))
             unit_price = float(unit_price.replace(',', ''))
         except ValueError:
-            invalid_records += 1
             continue
 
-        if quantity <= 0 or unit_price <= 0:
-            invalid_records += 1
-            continue
-
-        valid_records.append({
+        transactions.append({
             'TransactionID': transaction_id,
             'Date': date,
             'ProductID': product_id,
@@ -65,9 +45,70 @@ def clean_and_validate_data(raw_lines):
             'Region': region
         })
 
-    # REQUIRED OUTPUT
-    print(f"Total records parsed: {total_records}")
-    print(f"Invalid records removed: {invalid_records}")
-    print(f"Valid records after cleaning: {len(valid_records)}")
+    return transactions
 
-    return valid_records
+
+def validate_and_filter(transactions, region=None, min_amount=None, max_amount=None):
+    """
+    Validates transactions and applies optional filters
+    """
+
+    valid_transactions = []
+    invalid_count = 0
+
+    # Validation
+    for t in transactions:
+        if (
+            t['Quantity'] <= 0 or
+            t['UnitPrice'] <= 0 or
+            not t['TransactionID'].startswith('T') or
+            not t['ProductID'].startswith('P') or
+            not t['CustomerID'].startswith('C') or
+            not t['Region']
+        ):
+            invalid_count += 1
+            continue
+
+        valid_transactions.append(t)
+
+    # Display available regions
+    regions = sorted(set(t['Region'] for t in valid_transactions))
+    print(f"Available regions: {', '.join(regions)}")
+
+    # Display transaction amount range
+    amounts = [t['Quantity'] * t['UnitPrice'] for t in valid_transactions]
+    print(f"Transaction amount range: {min(amounts):.2f} - {max(amounts):.2f}")
+
+    filtered = valid_transactions[:]
+    filtered_by_region = 0
+    filtered_by_amount = 0
+
+    # Filter by region
+    if region:
+        filtered_by_region = sum(1 for t in filtered if t['Region'] != region)
+        filtered = [t for t in filtered if t['Region'] == region]
+        print(f"After region filter ({region}): {len(filtered)} records")
+
+    # Filter by min amount
+    if min_amount is not None:
+        removed = [t for t in filtered if t['Quantity'] * t['UnitPrice'] < min_amount]
+        filtered_by_amount += len(removed)
+        filtered = [t for t in filtered if t['Quantity'] * t['UnitPrice'] >= min_amount]
+        print(f"After min amount filter ({min_amount}): {len(filtered)} records")
+
+    # Filter by max amount
+    if max_amount is not None:
+        removed = [t for t in filtered if t['Quantity'] * t['UnitPrice'] > max_amount]
+        filtered_by_amount += len(removed)
+        filtered = [t for t in filtered if t['Quantity'] * t['UnitPrice'] <= max_amount]
+        print(f"After max amount filter ({max_amount}): {len(filtered)} records")
+
+    summary = {
+        'total_input': len(transactions),
+        'invalid': invalid_count,
+        'filtered_by_region': filtered_by_region,
+        'filtered_by_amount': filtered_by_amount,
+        'final_count': len(filtered)
+    }
+
+    return filtered, invalid_count, summary
