@@ -277,3 +277,27 @@ def daily_sales_trend(transactions):
     sorted_daily_stats = dict(sorted(daily_stats.items(), key=lambda x: x[0]))
 
     return sorted_daily_stats
+
+
+def find_peak_sales_day(transactions):
+    """
+    Identifies the date with highest revenue
+
+    Returns: tuple (date, revenue, transaction_count)
+    Example: ('2024-12-15', 185000.0, 12)
+    """
+    daily_stats = daily_sales_trend(transactions)
+
+    peak_date, peak_data = max(
+        daily_stats.items(),
+        key=lambda item: item[1]['revenue']
+    )
+
+    return (
+        peak_date,
+        peak_data['revenue'],
+        peak_data['transaction_count']
+    )
+
+
+
