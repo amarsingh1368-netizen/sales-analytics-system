@@ -233,3 +233,47 @@ def customer_analysis(transactions):
 
     return sorted_customers
 
+
+
+
+def daily_sales_trend(transactions):
+    """
+    Analyzes sales trends by date.
+    
+    Returns a dictionary sorted by date:
+    {
+        '2024-12-01': {'revenue': 125000.0, 'transaction_count': 8, 'unique_customers': 6},
+        '2024-12-02': {...},
+        ...
+    }
+    """
+    # Step 1: Initialize empty dictionary
+    daily_stats = {}
+
+    # Step 2: Loop through all transactions
+    for t in transactions:
+        date = t['Date']
+        amount = t['Quantity'] * t['UnitPrice']
+        customer = t['CustomerID']
+
+        # Initialize date if not already in dictionary
+        if date not in daily_stats:
+            daily_stats[date] = {
+                'revenue': 0.0,
+                'transaction_count': 0,
+                'unique_customers': set()
+            }
+
+        # Update stats
+        daily_stats[date]['revenue'] += amount
+        daily_stats[date]['transaction_count'] += 1
+        daily_stats[date]['unique_customers'].add(customer)
+
+    # Step 3: Convert sets to counts
+    for date, stats in daily_stats.items():
+        stats['unique_customers'] = len(stats['unique_customers'])
+
+    # Step 4: Sort dictionary by date
+    sorted_daily_stats = dict(sorted(daily_stats.items(), key=lambda x: x[0]))
+
+    return sorted_daily_stats
