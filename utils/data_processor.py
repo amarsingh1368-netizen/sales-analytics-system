@@ -127,3 +127,43 @@ def calculate_total_revenue(transactions):
 
     return round(total_revenue, 2)
 
+
+
+def region_wise_sales(transactions):
+    """
+    Analyzes sales by region
+    """
+    region_data = {}
+    total_sales_all = 0.0
+
+    # First pass: calculate totals per region
+    for txn in transactions:
+        region = txn['Region']
+        revenue = txn['Quantity'] * txn['UnitPrice']
+        total_sales_all += revenue
+
+        if region not in region_data:
+            region_data[region] = {
+                'total_sales': 0.0,
+                'transaction_count': 0
+            }
+
+        region_data[region]['total_sales'] += revenue
+        region_data[region]['transaction_count'] += 1
+
+    # Second pass: calculate percentage
+    for region in region_data:
+        percentage = (region_data[region]['total_sales'] / total_sales_all) * 100
+        region_data[region]['percentage'] = round(percentage, 2)
+
+    # Sort by total_sales descending
+    sorted_region_data = dict(
+        sorted(
+            region_data.items(),
+            key=lambda item: item[1]['total_sales'],
+            reverse=True
+        )
+    )
+
+    return sorted_region_data
+
