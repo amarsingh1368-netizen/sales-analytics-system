@@ -112,3 +112,18 @@ def validate_and_filter(transactions, region=None, min_amount=None, max_amount=N
     }
 
     return filtered, invalid_count, summary
+
+
+def calculate_total_revenue(transactions):
+    """
+    Calculates total revenue from all transactions
+
+    Returns: float (total revenue)
+    """
+    total_revenue = 0.0
+
+    for txn in transactions:
+        total_revenue += txn['Quantity'] * txn['UnitPrice']
+
+    return round(total_revenue, 2)
+
