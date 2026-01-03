@@ -1,31 +1,20 @@
 # utils/data_processor.py
 
-def clean_and_process_data(lines):
+def clean_and_validate_data(raw_lines):
     """
-    Cleans, validates, and processes raw sales data lines.
-    Returns cleaned records.
+    Parses, cleans, and validates raw sales data
+    Prints required validation summary
     """
 
     total_records = 0
     invalid_records = 0
-    cleaned_records = []
+    valid_records = []
 
-    header_skipped = False
-
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        # Skip header
-        if not header_skipped:
-            header_skipped = True
-            continue
-
+    for line in raw_lines:
         total_records += 1
         parts = line.split('|')
 
-        # Must have 8 columns
+        # Must have exactly 8 fields
         if len(parts) != 8:
             invalid_records += 1
             continue
@@ -42,7 +31,7 @@ def clean_and_process_data(lines):
         ) = parts
 
         # Validation rules
-        if not transaction_id.startswith("T"):
+        if not transaction_id.startswith('T'):
             invalid_records += 1
             continue
 
@@ -50,42 +39,35 @@ def clean_and_process_data(lines):
             invalid_records += 1
             continue
 
-        # Clean quantity
-        try:
-            quantity = int(quantity.replace(',', ''))
-            if quantity <= 0:
-                invalid_records += 1
-                continue
-        except ValueError:
-            invalid_records += 1
-            continue
-
-        # Clean unit price
-        try:
-            unit_price = float(unit_price.replace(',', ''))
-            if unit_price <= 0:
-                invalid_records += 1
-                continue
-        except ValueError:
-            invalid_records += 1
-            continue
-
         # Clean product name
         product_name = product_name.replace(',', '')
 
-        # Calculate revenue
-        revenue = quantity * unit_price
+        # Clean numeric fields
+        try:
+            quantity = int(quantity.replace(',', ''))
+            unit_price = float(unit_price.replace(',', ''))
+        except ValueError:
+            invalid_records += 1
+            continue
 
-        cleaned_record = (
-            f"{transaction_id}|{date}|{product_id}|{product_name}|"
-            f"{quantity}|{unit_price:.2f}|{customer_id}|{region}|{revenue:.2f}"
-        )
+        if quantity <= 0 or unit_price <= 0:
+            invalid_records += 1
+            continue
 
-        cleaned_records.append(cleaned_record)
+        valid_records.append({
+            'TransactionID': transaction_id,
+            'Date': date,
+            'ProductID': product_id,
+            'ProductName': product_name,
+            'Quantity': quantity,
+            'UnitPrice': unit_price,
+            'CustomerID': customer_id,
+            'Region': region
+        })
 
-    # Print summary
+    # REQUIRED OUTPUT
     print(f"Total records parsed: {total_records}")
     print(f"Invalid records removed: {invalid_records}")
-    print(f"Valid records after cleaning: {len(cleaned_records)}")
+    print(f"Valid records after cleaning: {len(valid_records)}")
 
-    return cleaned_records
+    return valid_records
