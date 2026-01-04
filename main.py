@@ -14,7 +14,8 @@ from utils.data_processor import (
 )
 from utils.api_handler import (
     fetch_all_products,
-    create_product_mapping
+    create_product_mapping,
+    enrich_sales_data
 )
 import os
 
@@ -121,6 +122,19 @@ def main():
         count += 1
         if count == 3:
            break
+
+
+
+    # -----------------------------
+    # Q4: API Integration – Step 3.2
+    # -----------------------------
+
+
+    print("\nTesting enrichment of first 5 transactions:")
+    enriched_data = enrich_sales_data(transactions[:5], product_mapping)
+    for t in enriched_data:
+        print(t)
+
 
 
 

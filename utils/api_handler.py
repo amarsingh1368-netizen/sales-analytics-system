@@ -52,3 +52,40 @@ def create_product_mapping(api_products):
         }
 
     return product_mapping
+
+def enrich_sales_data(transactions, product_mapping):
+    """
+    Enriches transaction data with API product information
+
+    Parameters:
+    - transactions: list of transaction dictionaries
+    - product_mapping: dictionary from create_product_mapping()
+
+    Returns: list of enriched transaction dictionaries
+    """
+    enriched = []
+
+    for txn in transactions:
+        new_txn = txn.copy()  # Copy original transaction
+        product_id_str = txn['ProductID'].lstrip('P')  # Remove 'P'
+        try:
+            product_id = int(product_id_str)
+        except ValueError:
+            product_id = None
+
+        if product_id and product_id in product_mapping:
+            api_info = product_mapping[product_id]
+            new_txn['API_Category'] = api_info.get('category')
+            new_txn['API_Brand'] = api_info.get('brand')
+            new_txn['API_Rating'] = api_info.get('rating')
+            new_txn['API_Match'] = True
+        else:
+            new_txn['API_Category'] = None
+            new_txn['API_Brand'] = None
+            new_txn['API_Rating'] = None
+            new_txn['API_Match'] = False
+
+        enriched.append(new_txn)
+
+    return enriched
+
