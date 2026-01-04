@@ -8,8 +8,11 @@ from utils.data_processor import (
     region_wise_sales,
     top_selling_products,
     customer_analysis,
-    daily_sales_trend
+    daily_sales_trend,
+    find_peak_sales_day,
+    low_performing_products
 )
+from utils.api_handler import fetch_all_products
 import os
 
 DATA_FILE = os.path.join("data", "sales_data.txt")
@@ -69,6 +72,31 @@ def main():
         count += 1
         if count == 5:
             break
+
+    # Find peak salesday
+    print("\nPeak Sales Day:")
+    peak_day = find_peak_sales_day(valid)
+    print(peak_day)
+
+    # Test Low Performing Products
+    print("\nTesting Low Performing Products:")
+    low_products = low_performing_products(valid, threshold=10)
+    if low_products:
+        for product in low_products:
+            print(product)
+    else:
+        print("No low performing products found.")
+
+    # -----------------------------
+    # Q4: API Integration – Step 1
+    # -----------------------------
+    print("\nTesting API Fetch:")
+    api_products = fetch_all_products()
+    print("Number of products fetched:", len(api_products))
+
+    print("\nFirst 3 API Products:")
+    for p in api_products[:3]:
+        print(p)
 
 
 if __name__ == "__main__":
