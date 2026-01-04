@@ -12,7 +12,10 @@ from utils.data_processor import (
     find_peak_sales_day,
     low_performing_products
 )
-from utils.api_handler import fetch_all_products
+from utils.api_handler import (
+    fetch_all_products,
+    create_product_mapping
+)
 import os
 
 DATA_FILE = os.path.join("data", "sales_data.txt")
@@ -88,7 +91,7 @@ def main():
         print("No low performing products found.")
 
     # -----------------------------
-    # Q4: API Integration – Step 1
+    # Q4: API Integration – Step 3.1 (a)
     # -----------------------------
     print("\nTesting API Fetch:")
     api_products = fetch_all_products()
@@ -97,6 +100,28 @@ def main():
     print("\nFirst 3 API Products:")
     for p in api_products[:3]:
         print(p)
+
+    # -----------------------------
+    # Q4: API Integration – Step 3.1 (b)
+    # -----------------------------
+
+    print("\nFetching products from DummyJSON API...")
+    api_products = fetch_all_products()   # ✅ THIS LINE WAS MISSING
+
+    print("Total products fetched:", len(api_products))
+
+    print("\nTesting Product Mapping:")
+    product_mapping = create_product_mapping(api_products)
+
+    print("Total mapped products:", len(product_mapping))
+
+    count = 0
+    for pid, info in product_mapping.items():
+        print(pid, info)
+        count += 1
+        if count == 3:
+           break
+
 
 
 if __name__ == "__main__":
