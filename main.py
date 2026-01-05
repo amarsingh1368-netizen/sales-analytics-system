@@ -15,8 +15,11 @@ from utils.data_processor import (
 from utils.api_handler import (
     fetch_all_products,
     create_product_mapping,
-    enrich_sales_data
+    enrich_sales_data,
+    save_enriched_data 
 )
+from utils.report_generator import generate_sales_report
+
 import os
 
 DATA_FILE = os.path.join("data", "sales_data.txt")
@@ -123,19 +126,26 @@ def main():
         if count == 3:
            break
 
-
-
     # -----------------------------
     # Q4: API Integration – Step 3.2
     # -----------------------------
 
+    print("DEBUG: valid count =", len(valid))
 
-    print("\nTesting enrichment of first 5 transactions:")
-    enriched_data = enrich_sales_data(transactions[:5], product_mapping)
-    for t in enriched_data:
-        print(t)
+    # Step 5: Enrich transactions
+    enriched_data = enrich_sales_data(valid, product_mapping)
+    print(f"\nEnriched {len(enriched_data)} transactions")
 
+    # Step 6: Save enriched transactions
+    save_enriched_data(enriched_data)
+    print("\nEnriched sales data saved to 'data/enriched_sales_data.txt'")
 
+    # -----------------------------
+    # Q4: API Integration – Step 3.2
+    # -----------------------------
+    
+    generate_sales_report(valid, enriched_data)
+    
 
 
 if __name__ == "__main__":
