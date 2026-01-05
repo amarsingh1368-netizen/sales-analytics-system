@@ -1,5 +1,7 @@
 from datetime import datetime
 from utils.data_processor import region_wise_sales
+from utils.data_processor import top_selling_products
+
 
 def generate_sales_report(transactions, enriched_transactions, output_file='output/sales_report.txt'):
     """
@@ -48,3 +50,23 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
             )
 
         f.write("\n")
+
+
+        # TOP 5 PRODUCTS
+        top_products = top_selling_products(transactions, n=5)
+
+        f.write("TOP 5 PRODUCTS\n")
+        f.write("-" * 44 + "\n")
+        f.write(f"{'Rank':<6}{'Product Name':<25}{'Qty Sold':<10}{'Revenue'}\n")
+
+        for idx, product in enumerate(top_products, start=1):
+            name, qty, revenue = product
+            f.write(
+                f"{idx:<6}"
+                f"{name:<25}"
+                f"{qty:<10}"
+                f"₹{revenue:,.2f}\n"
+            )
+
+        f.write("\n")
+
