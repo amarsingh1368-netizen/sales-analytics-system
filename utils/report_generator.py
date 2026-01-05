@@ -1,6 +1,8 @@
 from datetime import datetime
 from utils.data_processor import region_wise_sales
 from utils.data_processor import top_selling_products
+from utils.data_processor import customer_analysis
+
 
 
 def generate_sales_report(transactions, enriched_transactions, output_file='output/sales_report.txt'):
@@ -69,4 +71,25 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
             )
 
         f.write("\n")
+
+        # TOP 5 CUSTOMERS
+        customer_stats = customer_analysis(transactions)
+
+        f.write("TOP 5 CUSTOMERS\n")
+        f.write("-" * 44 + "\n")
+        f.write(f"{'Rank':<6}{'Customer ID':<15}{'Total Spent':<15}{'Orders'}\n")
+
+        for idx, (cust_id, info) in enumerate(customer_stats.items(), start=1):
+            if idx > 5:
+                break
+
+            f.write(
+                f"{idx:<6}"
+                f"{cust_id:<15}"
+                f"₹{info['total_spent']:,.2f}  "
+                f"{info['purchase_count']}\n"
+            )
+
+        f.write("\n")
+
 
