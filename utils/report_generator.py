@@ -2,6 +2,7 @@ from datetime import datetime
 from utils.data_processor import region_wise_sales
 from utils.data_processor import top_selling_products
 from utils.data_processor import customer_analysis
+from utils.data_processor import daily_sales_trend
 
 
 
@@ -92,4 +93,21 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
 
         f.write("\n")
 
+
+        # DAILY SALES TREND
+        daily_stats = daily_sales_trend(transactions)
+
+        f.write("DAILY SALES TREND\n")
+        f.write("-" * 44 + "\n")
+        f.write(f"{'Date':<12}{'Revenue':<15}{'Transactions':<15}{'Unique Customers'}\n")
+
+        for date, stats in daily_stats.items():
+            f.write(
+                f"{date:<12}"
+                f"₹{stats['revenue']:,.2f}  "
+                f"{stats['transaction_count']:<15}"
+                f"{stats['unique_customers']}\n"
+            )
+
+        f.write("\n")
 
