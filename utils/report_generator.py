@@ -149,3 +149,29 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
         for region, stats in region_data.items():
             avg_value = stats['total_sales'] / stats['transaction_count']
             f.write(f"{region}: ₹{avg_value:,.2f}\n")
+
+        
+        # =====================================================
+        # 8. API ENRICHMENT SUMMARY
+        # =====================================================
+        f.write("\n\nAPI ENRICHMENT SUMMARY\n")
+        f.write("-" * 44 + "\n")
+
+        total_records = len(enriched_transactions)
+        enriched_success = [t for t in enriched_transactions if t['API_Match']]
+        enriched_failed = [t for t in enriched_transactions if not t['API_Match']]
+
+        success_rate = (len(enriched_success) / total_records * 100) if total_records else 0
+
+        f.write(f"Total Products Enriched: {len(enriched_success)}\n")
+        f.write(f"Success Rate: {success_rate:.2f}%\n")
+
+        failed_products = sorted(set(t['ProductName'] for t in enriched_failed))
+        if failed_products:
+            f.write("Products Not Enriched:\n")
+            for product in failed_products:
+                f.write(f"- {product}\n")
+        else:
+            f.write("Products Not Enriched: None\n")
+
+
