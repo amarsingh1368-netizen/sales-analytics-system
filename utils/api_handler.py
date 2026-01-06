@@ -89,3 +89,31 @@ def enrich_sales_data(transactions, product_mapping):
 
     return enriched
 
+def save_enriched_data(enriched_transactions, filename='data/enriched_sales_data.txt'):
+    """
+    Saves enriched transactions back to file
+
+    Expected File Format:
+    TransactionID|Date|ProductID|ProductName|Quantity|UnitPrice|CustomerID|Region|API_Category|API_Brand|API_Rating|API_Match
+    """
+    # Define header
+    header = [
+        'TransactionID', 'Date', 'ProductID', 'ProductName', 'Quantity',
+        'UnitPrice', 'CustomerID', 'Region',
+        'API_Category', 'API_Brand', 'API_Rating', 'API_Match'
+    ]
+
+    with open(filename, 'w', encoding='utf-8') as f:
+        # Write header
+        f.write('|'.join(header) + '\n')
+
+        # Write each transaction
+        for txn in enriched_transactions:
+            row = [
+                str(txn.get(col, '')) if txn.get(col) is not None else ''
+                for col in header
+            ]
+            f.write('|'.join(row) + '\n')
+
+    print(f"Enriched data saved to {filename}")
+

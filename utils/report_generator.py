@@ -154,6 +154,7 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
         # =====================================================
         # 8. API ENRICHMENT SUMMARY
         # =====================================================
+        
         f.write("\n\nAPI ENRICHMENT SUMMARY\n")
         f.write("-" * 44 + "\n")
 
@@ -173,5 +174,6 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
                 f.write(f"- {product}\n")
         else:
             f.write("Products Not Enriched: None\n")
+
 
 
