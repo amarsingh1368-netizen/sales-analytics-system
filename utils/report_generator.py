@@ -1,8 +1,12 @@
 from datetime import datetime
-from utils.data_processor import region_wise_sales
-from utils.data_processor import top_selling_products
-from utils.data_processor import customer_analysis
-from utils.data_processor import daily_sales_trend
+
+from utils.data_processor import (
+    region_wise_sales,
+    top_selling_products,
+    customer_analysis,
+    daily_sales_trend,
+    low_performing_products
+)
 
 
 
@@ -10,6 +14,7 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
     """
     Generates a comprehensive formatted text report
     """
+    
     with open(output_file, 'w', encoding='utf-8') as f:
         # HEADER SECTION
         f.write("=" * 44 + "\n")
@@ -111,3 +116,36 @@ def generate_sales_report(transactions, enriched_transactions, output_file='outp
 
         f.write("\n")
 
+
+
+        # PRODUCT PERFORMANCE ANALYSIS
+        f.write("PRODUCT PERFORMANCE ANALYSIS\n")
+        f.write("-" * 44 + "\n")
+
+        # Best Selling Day
+        best_day, best_data = max(
+            daily_stats.items(),
+            key=lambda x: x[1]['revenue']
+        )
+        f.write(
+            f"Best Selling Day: {best_day} "
+            f"(₹{best_data['revenue']:,.2f})\n"
+        )
+
+        # Low Performing Products
+        low_products = low_performing_products(transactions)
+        if low_products:
+            f.write("\nLow Performing Products:\n")
+            for product, qty, revenue in low_products:
+                f.write(
+                    f"- {product}: Qty={qty}, "
+                    f"Revenue=₹{revenue:,.2f}\n"
+                )
+        else:
+            f.write("\nLow Performing Products: None\n")
+
+        # Average Transaction Value per Region
+        f.write("\nAverage Transaction Value per Region:\n")
+        for region, stats in region_data.items():
+            avg_value = stats['total_sales'] / stats['transaction_count']
+            f.write(f"{region}: ₹{avg_value:,.2f}\n")
